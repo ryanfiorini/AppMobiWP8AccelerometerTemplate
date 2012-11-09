@@ -251,7 +251,7 @@ AppMobi.Accelerometer.prototype.watchAcceleration = function (successCallback, o
  * @param {String} watchId The ID of the watch returned from #watchAcceleration.
  */
 AppMobi.Accelerometer.prototype.clearWatch = function (watchId) {
-    AppMobi.exec("AccelerometerStop");
+    AppMobi.exec("AppMobiAccelerometer~AccelerometerStop");
     clearInterval(watchId);
 };
 
@@ -1255,7 +1255,7 @@ AppMobi.Device.prototype.setAutoRotate = function (shouldAutoRotate) {
 };
 
 AppMobi.Device.prototype.setRotateOrientation = function (orientation) {
-    window.external.notify("ORIENTATION~" + orientation);
+    window.external.notify("~ORIENTATION~" + orientation);
 };
 
 AppMobi.Device.prototype.updateConnection = function () {
@@ -1376,7 +1376,7 @@ AppMobi.Device.prototype.getRemoteDataExt = function (parameters) {
         throw (new Error("Error: AppMobi.device.getRemoteDataExt requires a method property of GET or POST. body is ignored for GET requests."));
     }
 
-    AppMobi.exec("REMOTEDATA", parameters.url, parameters.id, parameters.method, parameters.body, parameters.headers);
+    AppMobi.exec("~REMOTEDATA", parameters.url, parameters.id, parameters.method, parameters.body, parameters.headers);
     //window.external.notify("remoteDataExt");
 };
 
@@ -1630,7 +1630,7 @@ AppMobi.Display.prototype.updateViewportContent = function (content) {
     viewPortCss.innerHTML = "@-ms-viewport{width: " + content + ";}";
     viewPortCss.innerHTML += "@viewport {zoom:1;max-zoom:1;min-zoom:1;user-zoom:zoom;}";
     head.appendChild(viewPortCss);
-    window.external.notify("REDRAW");
+    window.external.notify("~REDRAW");
 }
 
 AppMobi.Display.prototype.updateViewportOrientation = function (orientation) {
