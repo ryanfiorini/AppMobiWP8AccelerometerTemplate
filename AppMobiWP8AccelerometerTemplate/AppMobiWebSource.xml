@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- This file is auto-generated, do not edit! -jm -->
+<AppMobiWebSource>
+  <FilePath Value="html\index.html"/>
+
+  <FilePath Value="html\_appMobi\appmobi.js"/>
+  <FilePath Value="html\_appMobi\appmobi_local_bootstrap.js"/>
+  <FilePath Value="html\_appMobi\jq.desktopBrowsers.js"/>
+  <FilePath Value="html\_appMobi\window.js"/>
+  <FilePath Value="html\_appMobi\xhr.js"/>
+
+  <FilePath Value="html\images\background.jpg"/>
+</AppMobiWebSource>

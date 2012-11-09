@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html><!--HTML5 doctype-->
+<html>
+<head>
+<title>Your New Application</title>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8"> 
+
+<!-- If you use this the AppMobi.display.useViewport() will not work -->
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"> -->
+
+<style type="text/css">
+    /* Prevent copy paste for all elements except text fields and block touch actions */
+    *  { -webkit-user-select:none; -webkit-tap-highlight-color:rgba(255, 255, 255, 0); -ms-touch-action:none; }
+    input, textarea  { -webkit-user-select:text; }
+    
+    /* Set up the page with a default background image */
+    body {
+        background-color:#fff;
+        color:#000;
+        font-family:Arial;
+        font-size:24pt;
+        margin:0px;padding:0px;
+        background-image:url('images/background.jpg');
+    }
+    #content {
+        display: none;
+    }
+
+    /*  If you use this the AppMobi.display.useViewport wi not work
+    @-ms-viewport { width: 480px; }
+    @viewport { width: 480px; }*/
+</style>
+
+<script type="text/javascript" charset="utf-8" src="_appMobi/appmobi_local_bootstrap.js"></script> 
+<script type="text/javascript" charset="utf-8" src="_appMobi/jq.desktopBrowsers.js"></script> 
+
+<script type="text/javascript" charset="utf-8" src="_appMobi/window.js"></script> 
+
+<script type="text/javascript">
+/* This function runs once the page is loaded, but appMobi is not yet active */
+var init = function(){
+};
+window.addEventListener("load",init,false);  
+
+/* This code prevents users from dragging the page */
+var preventDefaultScroll = function(event) {
+    event.preventDefault();
+    window.scroll(0,0);
+    return false;
+};
+document.addEventListener('touchmove', preventDefaultScroll, false);
+
+/* This code is used to run as soon as appMobi activates */
+var onDeviceReady = function () {
+    // *** console.log(""); to display messages in the Visual Studio Output Window. ***
+    console.log("in onDeviceReady");
+
+    var orientation = "portrait";  // portrait or landscape
+    var portraitWidth = 320;
+    var landscapeWidth = 480;
+
+    AppMobi.device.setAutoRotate(false);
+    //AppMobi.device.setRotateOrientation(orientation);
+    AppMobi.display.useViewport(portraitWidth, landscapeWidth);
+
+	//hide appMobi's plash screen not yours
+	AppMobi.device.hideSplashScreen();	
+
+	document.getElementById('splashScreen').style.display = "none";
+	document.getElementById('content').style.display = "block";
+};
+document.addEventListener("appMobi.device.ready",onDeviceReady,false);    
+
+var onOrientationChange = function () {
+    console.log("in onOrientationChange");
+
+    // do what you like here
+};
+document.addEventListener("appMobi.device.orientation.change", onOrientationChange, false);
+</script>
+
+</head>
+<body>
+    <div id="splashScreen">
+        LOADING...
+    </div>
+    <div id="content">
+        <!-- Your app content goes here -->
+        <br /> 
+        Hello Windows Phone 8 App.  Place the content of your appMobi app here.
+    </div>
+</body>
+</html>
