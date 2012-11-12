@@ -105,7 +105,7 @@ function successFunction(evt) {
     console.log("accelerometerReadings: X=" + evt.x + ", Y=" + evt.y + ", Z=" + evt.z);
     //Readings are from -1 to 1 (with 0 being equilibrium in a plane). 
     //Assuning you hold the device in portrait mode with the  screen pointed straight at your chest.
-    document.getElementById("accelerometerReadings").innerHTML = "X=" + evt.x + ", Y=" + evt.y + ", Z=" + evt.z;
+    document.getElementById("accelerometerReadings").innerHTML = "X=" + evt.x + "<br />Y=" + evt.y + "<br />Z=" + evt.z;
 }
 
 function watchAccelerometer() {
@@ -130,9 +130,10 @@ function clearAccelerometer() {
     <div id="content">
         <!-- Your app content goes here -->
         <br /> 
-        Hello Windows Phone 8 App.  Place the content of your appMobi app here.
+        appMobi Accelerator Template.  
         <button onclick="startListening()">Start Accelerometer</button>
         <button onclick="stopListening()">Stop Accelerometer</button>
+        <br /><br />
     </div>
 </body>
 </html>
