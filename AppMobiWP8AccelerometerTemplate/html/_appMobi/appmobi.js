@@ -107,7 +107,8 @@ AppMobi.exec = function () {
     }
 
     //var url = "appmobi://" + args[0] + "/" + uri.join("/") + "/";
-    var url = "" + args[0] + "~" + uri.join("~") + "~";
+    //var url = "" + args[0] + "~" + uri.join("~") + "~";
+    var url = "" + args[0] + "~" + uri.join("~");
 
     if (dict != null) {
         var query_args = [];
@@ -239,7 +240,7 @@ AppMobi.Accelerometer.prototype.watchAcceleration = function (successCallback, o
         }
         if (typeof (options.adjustForRotation) == "boolean") _options.adjustForRotation = options.adjustForRotation;
     }
-    AppMobi.exec("AppMobiAccelerometer~AccelerometerStart", _options.frequency);
+    AppMobi.exec("AppMobiAccelerometer~Start~", _options.frequency);
     AppMobi.accelerometer.getCurrentAcceleration(successCallback, _options);
     return setInterval(function () {
         AppMobi.accelerometer.getCurrentAcceleration(successCallback, _options);
@@ -251,7 +252,7 @@ AppMobi.Accelerometer.prototype.watchAcceleration = function (successCallback, o
  * @param {String} watchId The ID of the watch returned from #watchAcceleration.
  */
 AppMobi.Accelerometer.prototype.clearWatch = function (watchId) {
-    AppMobi.exec("AppMobiAccelerometer~AccelerometerStop");
+    AppMobi.exec("AppMobiAccelerometer~Stop~");
     clearInterval(watchId);
 };
 
@@ -1337,7 +1338,7 @@ AppMobi.Device.prototype.getRemoteDataImpl = function (requestUrl, requestMethod
 
     if (requestBody == undefined) requestBody = "";
 
-    AppMobi.exec("REMOTEDATA", requestUrl, requestMethod, requestBody, successCallback, errorCallback, id, hasId);
+    AppMobi.exec("AppMobiDevice~REMOTEDATA~", requestUrl, requestMethod, requestBody, successCallback, errorCallback, id, hasId);
 };
 
 AppMobi.Device.prototype.getRemoteDataWithId = function (requestUrl, requestMethod, requestBody, successCallback, errorCallback, id) {
@@ -1376,7 +1377,7 @@ AppMobi.Device.prototype.getRemoteDataExt = function (parameters) {
         throw (new Error("Error: AppMobi.device.getRemoteDataExt requires a method property of GET or POST. body is ignored for GET requests."));
     }
 
-    AppMobi.exec("~REMOTEDATA", parameters.url, parameters.id, parameters.method, parameters.body, parameters.headers);
+    AppMobi.exec("AppMobiDevice~GetRemoteData~", parameters.url, parameters.id, parameters.method, parameters.body, parameters.headers);
     //window.external.notify("remoteDataExt");
 };
 
@@ -1630,7 +1631,8 @@ AppMobi.Display.prototype.updateViewportContent = function (content) {
     viewPortCss.innerHTML = "@-ms-viewport{width: " + content + ";}";
     viewPortCss.innerHTML += "@viewport {zoom:1;max-zoom:1;min-zoom:1;user-zoom:zoom;}";
     head.appendChild(viewPortCss);
-    window.external.notify("~REDRAW");
+    //window.external.notify("~REDRAW");
+    AppMobi.exec("~redraw~");
 }
 
 AppMobi.Display.prototype.updateViewportOrientation = function (orientation) {

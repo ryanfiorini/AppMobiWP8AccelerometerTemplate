@@ -1,15 +1,15 @@
 ﻿window.console = {};
 window.console.log = function () {
     var args = [].splice.call(arguments, 0);
-    window.external.Notify("~logger~" + args.join(', '));
+    window.external.Notify("AppMobiDebug~Log~~" + args.join(', '));
 };
 window.console.error = function () {
     var args = [].splice.call(arguments, 0);
-    window.external.Notify("~error~" + args.join(', '));
+    window.external.Notify("AppMobiDebug~Error~~" + args.join(', '));
 };
 window.console.warn = function () {
     var args = [].splice.call(arguments, 0);
-    window.external.Notify("~warn~" + args.join(', '));
+    window.external.Notify("AppMobiDebug~Warn~~" + args.join(', '));
 };
 
 window.onerror = function (msg, url, lineNum) {
