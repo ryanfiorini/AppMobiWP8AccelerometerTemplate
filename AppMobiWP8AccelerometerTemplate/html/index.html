@@ -24,7 +24,14 @@
     #content {
         display: none;
     }
-
+    #accelDot {
+        height:10px; 
+        width:10px;
+        background-color:#000;
+        position:absolute;
+        top:0;
+        left:0;
+    }
     /*  If you use this the AppMobi.display.useViewport wi not work
     @-ms-viewport { width: 480px; }
     @viewport { width: 480px; }*/
@@ -49,6 +56,8 @@ var preventDefaultScroll = function(event) {
 };
 document.addEventListener('touchmove', preventDefaultScroll, false);
 
+var dotLocation = { x: 0, y: 0 };
+
 /* This code is used to run as soon as appMobi activates */
 var onDeviceReady = function () {
     // *** console.log(""); to display messages in the Visual Studio Output Window. ***
@@ -59,8 +68,14 @@ var onDeviceReady = function () {
     var landscapeWidth = 480;
 
     AppMobi.device.setAutoRotate(false);
-    //AppMobi.device.setRotateOrientation(orientation);
+    AppMobi.device.setRotateOrientation(orientation);
     AppMobi.display.useViewport(portraitWidth, landscapeWidth);
+
+    dotLocation.x = window.innerWidth / 2;
+    dotLocation.y = window.innerHeight / 2;
+
+    document.getElementById("accelDot").style.left = dotLocation.x + "px";
+    document.getElementById("accelDot").style.top = dotLocation.y + "px";
 
 	//hide appMobi's plash screen not yours
 	AppMobi.device.hideSplashScreen();	
@@ -101,16 +116,31 @@ function stopListening() {
     clearAccelerometer();
 }
 
+dotLocation = { x: (window.innerWidth/2), y: (window.innerHeight/2) };
+
 function successFunction(evt) {
-    console.log("accelerometerReadings: X=" + evt.x + ", Y=" + evt.y + ", Z=" + evt.z);
+    //console.log("accelerometerReadings: X=" + evt.x + ", Y=" + evt.y + ", Z=" + evt.z);
     //Readings are from -1 to 1 (with 0 being equilibrium in a plane). 
     //Assuning you hold the device in portrait mode with the  screen pointed straight at your chest.
     document.getElementById("accelerometerReadings").innerHTML = "X=" + evt.x + "<br />Y=" + evt.y + "<br />Z=" + evt.z;
+
+    dotLocation.x += evt.x * 10;
+    dotLocation.x = (dotLocation.x < 0) ? 0 : (dotLocation.x > (window.innerWidth - 10)) ? (window.innerWidth - 10) : dotLocation.x;
+
+    dotLocation.y += evt.y * -10;
+    dotLocation.y = (dotLocation.y < 0) ? 0 : (dotLocation.y > (window.innerHeight - 10)) ? (window.innerHeight - 10) : dotLocation.y;
+
+    //console.log("dotLocation.x: " + dotLocation.x, "dotLocation.y: " + dotLocation.y);
+    //document.getElementById("dotLoc").innerHTML = "X=" + dotLocation.x + "<br />Y=" + dotLocation.y;
+
+    document.getElementById("accelDot").style.left = dotLocation.x + "px";
+    document.getElementById("accelDot").style.top = dotLocation.y + "px";
+
 }
 
 function watchAccelerometer() {
     var options = {};
-    options.frequency = 1000; //check every 100 milliseconds
+    options.frequency = 10; //check every 100 milliseconds
     timer = AppMobi.accelerometer.watchAcceleration(successFunction, options);
 }
 
@@ -129,11 +159,14 @@ function clearAccelerometer() {
     </div>
     <div id="content">
         <!-- Your app content goes here -->
+        <div id="accelDot"></div>
         <br /> 
         appMobi Accelerator Template.  
+        <br />
         <button onclick="startListening()">Start Accelerometer</button>
         <button onclick="stopListening()">Stop Accelerometer</button>
         <br /><br />
+        <div id="dotLoc"></div>
     </div>
 </body>
 </html>

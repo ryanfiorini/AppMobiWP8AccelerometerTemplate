@@ -116,11 +116,12 @@ AppMobi.exec = function () {
         for (var name in dict) {
             if (typeof (name) != 'string')
                 continue;
-            query_args.push(encodeURIComponent(name) + "=" + encodeURIComponent(dict[name]));
+            //query_args.push(encodeURIComponent(name) + "=" + encodeURIComponent(dict[name]));
+            query_args.push(encodeURIComponent(dict[name]));
         }
 
         if (query_args.length > 0)
-            url += "?" + query_args.join("&");
+            url += query_args.join("~");
 
     }
 
@@ -239,8 +240,11 @@ AppMobi.Accelerometer.prototype.watchAcceleration = function (successCallback, o
             _options.frequency = parsedFreq < 25 ? 25 : parsedFreq;
         }
         if (typeof (options.adjustForRotation) == "boolean") _options.adjustForRotation = options.adjustForRotation;
+
+        _options.orientation = (AppMobi.device.orientation===0) ? "portrait" : "landscape";
     }
-    AppMobi.exec("AppMobiAccelerometer~Start~", _options.frequency);
+    //AppMobi.exec("AppMobiAccelerometer~Start~", _options.frequency);
+    AppMobi.exec("AppMobiAccelerometer~Start~", _options);
     AppMobi.accelerometer.getCurrentAcceleration(successCallback, _options);
     return setInterval(function () {
         AppMobi.accelerometer.getCurrentAcceleration(successCallback, _options);
@@ -1256,7 +1260,8 @@ AppMobi.Device.prototype.setAutoRotate = function (shouldAutoRotate) {
 };
 
 AppMobi.Device.prototype.setRotateOrientation = function (orientation) {
-    window.external.notify("~ORIENTATION~" + orientation);
+    //window.external.notify("~ORIENTATION~" + orientation);
+    AppMobi.exec("~ORIENTATION~", orientation);
 };
 
 AppMobi.Device.prototype.updateConnection = function () {
