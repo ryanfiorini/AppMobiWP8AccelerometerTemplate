@@ -154,6 +154,7 @@
     <Content Include="html\_appMobi\jq.desktopBrowsers.js" />
     <Content Include="html\_appMobi\window.js" />
     <Content Include="html\_appMobi\xhr.js" />
+    <Content Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\AppResources.resx">
