@@ -140,7 +140,7 @@ function successFunction(evt) {
 
 function watchAccelerometer() {
     var options = {};
-    options.frequency = 10; //check every 100 milliseconds
+    options.frequency = 10;
     timer = AppMobi.accelerometer.watchAcceleration(successFunction, options);
 }
 

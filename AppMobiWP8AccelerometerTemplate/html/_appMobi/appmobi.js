@@ -241,7 +241,7 @@ AppMobi.Accelerometer.prototype.watchAcceleration = function (successCallback, o
         }
         if (typeof (options.adjustForRotation) == "boolean") _options.adjustForRotation = options.adjustForRotation;
 
-        _options.orientation = (AppMobi.device.orientation===0) ? "portrait" : "landscape";
+        _options.orientation = (AppMobi.device.orientation === 0) ? "portrait" : "landscape";
     }
     //AppMobi.exec("AppMobiAccelerometer~Start~", _options.frequency);
     AppMobi.exec("AppMobiAccelerometer~Start~", _options);
@@ -297,23 +297,23 @@ AppMobi.Contacts.prototype.getContactData = function (id) {
 };
 
 AppMobi.Contacts.prototype.getContacts = function () {
-    AppMobi.stubEvent('contacts.get');
+    AppMobi.exec("AppMobiContacts~GetContacts~");
 }
 
-AppMobi.Contacts.prototype.addContact = function () {
-    AppMobi.stubEvent('contacts.add');
+AppMobi.Contacts.prototype.addContact = function (remoteId, first, last, street, city, state, zip, country, phone, email) {
+    AppMobi.exec("AppMobiContacts~AddContact~", remoteId, first, last, street, city, state, zip, country, phone, email);
 }
 
 AppMobi.Contacts.prototype.chooseContact = function () {
-    AppMobi.stubEvent('contacts.choose');
+    AppMobi.exec("AppMobiContacts~ChooseContact~");
 }
 
 AppMobi.Contacts.prototype.editContact = function (contactID) {
-    AppMobi.stubEvent('contacts.edit', { 'error': 'contacts not available on web', 'contactid': contactID });
+    AppMobi.exec("AppMobiContacts~EditContact~", contactID);
 }
 
 AppMobi.Contacts.prototype.removeContact = function (contactID) {
-    AppMobi.stubEvent('contacts.remove', { 'error': 'contacts not available on web', 'contactid': contactID });
+    AppMobi.exec("AppMobiContacts~RemoveContact~", contactID);
 }
 
 if (typeof AppMobi.contacts == "undefined") AppMobi.contacts = new AppMobi.Contacts();
@@ -780,23 +780,72 @@ AppMobi.Camera = function () {
 };
 
 AppMobi.Camera.prototype.takePicture = function (quality, saveToLib, picType) {
-    AppMobi.stubEvent('camera.picture.add');
+    if (quality == undefined || quality == null)
+        quality = 70; // default
+    else if ((quality < 1) || (quality > 100))
+        throw (new Error("Error: AppMobi.camera.takePicture, quality must be between 1-100."));
+
+    if (saveToLib == undefined || saveToLib == null)
+        saveToLib = true;
+
+    if (typeof (picType) == "undefined" || picType == null)
+        picType = "jpg";
+    else {
+        if (typeof (picType) != "string")
+            throw (new Error("Error: AppMobi.camera.takePicture, picType must be a string."));
+        if ((picType.toLowerCase() != "jpg") && (picType.toLowerCase() != "png"))
+            throw (new Error("Error: AppMobi.camera.takePicture, picType must be 'jpg' or 'png'."));
+    }
+    AppMobi.exec("AppMobiCamera~TakePicture~", quality, saveToLib, picType);
+};
+
+AppMobi.Camera.prototype.takeFrontPicture = function (quality, saveToLib, picType) {
+    if (quality == undefined || quality == null)
+        quality = 70; // default
+    else if ((quality < 1) || (quality > 100))
+        throw (new Error("Error: AppMobi.camera.takeFrontPicture, quality must be between 1-100."));
+
+    if (saveToLib == undefined || saveToLib == null)
+        saveToLib = true;
+
+    if (typeof (picType) == "undefined" || picType == null)
+        picType = "jpg";
+    else {
+        if (typeof (picType) != "string")
+            throw (new Error("Error: AppMobi.camera.takeFrontPicture, picType must be a string."));
+        if ((picType.toLowerCase() != "jpg") && (picType.toLowerCase() != "png"))
+            throw (new Error("Error: AppMobi.camera.takeFrontPicture, picType must be 'jpg' or 'png'."));
+    }
+    AppMobi.exec("AppMobiCamera~TakeFrontPicture~", quality, saveToLib, picType);
 };
 
 AppMobi.Camera.prototype.importPicture = function () {
-    AppMobi.stubEvent('camera.picture.add');
+    AppMobi.exec("AppMobiCamera~ImportPicture~");
 };
 
 AppMobi.Camera.prototype.deletePicture = function (picURL) {
-    AppMobi.stubEvent('camera.picture.remove');
+    if (picURL == undefined || picURL == null)
+        throw (new Error("Error: AppMobi.camera.deletePicture, call with a picURL"));
+    if (typeof (picURL) != "string")
+        throw (new Error("Error: AppMobi.camera.deletePicture, picURL must be a string."));
+
+    AppMobi.exec("AppMobiCamera~DeletePicture~", picURL);
 };
 
 AppMobi.Camera.prototype.clearPictures = function () {
-    AppMobi.stubEvent('camera.picture.clear');
+    AppMobi.exec("AppMobiCamera~ClearPictures~");
+};
+
+AppMobi.Camera.prototype.getPictures = function () {
+    AppMobi.exec("AppMobiCamera~GetPictures~");
 };
 
 AppMobi.Camera.prototype.getPictureList = function () {
-    return [];
+    var list = [];
+    for (var picture in AppMobi.picturelist) {
+        list.push(AppMobi.picturelist[picture]);
+    }
+    return list;
 }
 
 AppMobi.Camera.prototype.getPictureURL = function (filename) {
@@ -808,8 +857,10 @@ AppMobi.Camera.prototype.getPictureURL = function (filename) {
             break;
         }
     }
+
     if (found)
         localURL = AppMobi.webRoot + '_pictures/' + filename;
+
     return localURL;
 }
 
