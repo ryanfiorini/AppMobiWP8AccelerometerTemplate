@@ -23,9 +23,10 @@ jqMobi github	- https://github.com/appMobi/jQ.Mobi
 Other appMobi WP8 Templates:
     Install-Package AppMobiWP8HelloWorldTemplate
 	Install-Package AppMobiWP8SampleGameTemplate
-	Install-Package AppMobiWP8AccelerometerTemplate
 	Install-Package AppMobiWP8SimpleJqMobiTemplate
 	Install-Package AppMobiWP8JqMobiKitchenSinkTemplate
+	Install-Package AppMobiWP8AccelerometerTemplate
+	Install-Package AppMobiWP8CameraTemplate
 
 
 Developr Notes:
