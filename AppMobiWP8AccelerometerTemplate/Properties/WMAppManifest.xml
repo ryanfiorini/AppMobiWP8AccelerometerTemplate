@@ -2,7 +2,7 @@
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2012/deployment" AppPlatformVersion="8.0">
   <DefaultLanguage xmlns="" code="en-US" />
   <App xmlns="" ProductID="{c58f411e-9c2d-455c-85dc-9f451365d067}" Title="AppMobiWP8AccelerometerTemplate" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="AppMobiWP8AccelerometerTemplate author" Description="Sample description" Publisher="AppMobiWP8AccelerometerTemplate" PublisherID="{e479bf2a-a00b-4baa-96d4-003fd3eb9b5e}">
-    <IconPath IsRelative="true" IsResource="false">Assets\ApplicationIcon.png</IconPath>
+    <IconPath IsRelative="true" IsResource="false">Assets\appmobi.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_NETWORKING" />
       <Capability Name="ID_CAP_MEDIALIB_AUDIO" />

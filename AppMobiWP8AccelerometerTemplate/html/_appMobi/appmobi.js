@@ -23,7 +23,8 @@ AppMobi = {
     },
     _constructors: [],
     jsVersion: '3.4.0',
-    revision: 8
+    revision: 8,
+    sub: 5
 };
 
 /**
@@ -300,8 +301,8 @@ AppMobi.Contacts.prototype.getContacts = function () {
     AppMobi.exec("AppMobiContacts~GetContacts~");
 }
 
-AppMobi.Contacts.prototype.addContact = function (remoteId, first, last, street, city, state, zip, country, phone, email) {
-    AppMobi.exec("AppMobiContacts~AddContact~", remoteId, first, last, street, city, state, zip, country, phone, email);
+AppMobi.Contacts.prototype.addContact = function (first, last, street, city, state, zip, country, phone, email) {
+    AppMobi.exec("AppMobiContacts~AddContact~", first, last, street, city, state, zip, country, phone, email);
 }
 
 AppMobi.Contacts.prototype.chooseContact = function () {
@@ -762,6 +763,7 @@ AppMobi.Speech.prototype.recognize = function (longPause, language) {
 };
 
 AppMobi.Speech.prototype.stopRecording = function () {
+    AppMobi.exec("~AppMobiSpeech~stopRecording~");
 };
 
 AppMobi.Speech.prototype.vocalize = function (text, voiceName, language) {
@@ -874,22 +876,31 @@ AppMobi.Audio = function () {
 };
 
 AppMobi.Audio.prototype.startPlaying = function (recURL) {
-    AppMobi.stubEvent('player.audio.error');
+    AppMobi.exec("AppMobiAudio~StartPlaying~", recURL);
 };
 
 AppMobi.Audio.prototype.stopPlaying = function () {
+    AppMobi.exec("AppMobiAudio~StopPlaying~");
 };
 
 AppMobi.Audio.prototype.pausePlaying = function () {
+    AppMobi.exec("AppMobiAudio~PausePlaying~");
 };
 
 AppMobi.Audio.prototype.continuePlaying = function () {
+    AppMobi.exec("~AppMobiAudio~ContinuePlaying~");
 };
 
 AppMobi.Audio.prototype.startRecording = function (format, samplingRate, channels) {
+    AppMobi.exec("AppMobiAudio~StartRecording~", format, samplingRate, channels);
+};
+
+AppMobi.Audio.prototype.addSound = function (sound) {
+    AppMobi.exec("AppMobiAudio~AddSound~", sound);
 };
 
 AppMobi.Audio.prototype.stopRecording = function () {
+    AppMobi.exec("AppMobiAudio~StopRecording~");
 };
 
 AppMobi.Audio.prototype.pauseRecording = function () {
@@ -2233,18 +2244,159 @@ AppMobi.redirectMouseToTouch = function (type, originalEvent) {
 }
 
 AppMobi.emulateTouchEvents = function () {
-    var ee = document;
+    var cancelClickMove = false;
+    var preventAll = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    var redirectMouseToTouch = function (type, originalEvent, newTarget) {
+
+        var theTarget = newTarget ? newTarget : originalEvent.target;
+
+        //stop propagation, and remove default behavior for everything but INPUT, TEXTAREA & SELECT fields
+        if (theTarget.tagName.toUpperCase().indexOf("SELECT") == -1 &&
+	    theTarget.tagName.toUpperCase().indexOf("TEXTAREA") == -1 &&
+	    theTarget.tagName.toUpperCase().indexOf("INPUT") == -1)  //SELECT, TEXTAREA & INPUT
+        {
+            preventAll(originalEvent);
+        }
+
+        var touchevt = document.createEvent("Event");
+        touchevt.initEvent(type, true, true);
+        if (type != 'touchend') {
+            touchevt.touches = new Array();
+            touchevt.touches[0] = new Object();
+            touchevt.touches[0].pageX = originalEvent.pageX;
+            touchevt.touches[0].pageY = originalEvent.pageY;
+            //target
+            touchevt.touches[0].target = theTarget;
+            touchevt.changedTouches = touchevt.touches; //for jqtouch
+            touchevt.targetTouches = touchevt.touches;  //for jqtouch
+        }
+        //target
+        touchevt.target = theTarget;
+
+        touchevt.mouseToTouch = true;
+        //handle inline event handlers for target and parents (for bubbling)
+        var elem = originalEvent.target;
+        while (elem != null) {
+            if (elem.hasAttribute("on" + type)) {
+                eval(elem.getAttribute("on" + type));
+            }
+            elem = elem.parentElement;
+        }
+        theTarget.dispatchEvent(touchevt);
+    }
+
+    var mouseDown = false,
+		lastTarget = null, firstMove = false;
+
+
+    if (!window.navigator.msPointerEnabled) {
+
+        document.addEventListener("mousedown", function (e) {
+            mouseDown = true;
+            lastTarget = e.target;
+            if (e.target.nodeName.toLowerCase() == "a" && e.target.href.toLowerCase() == "javascript:;")
+                e.target.href = "#";
+            redirectMouseToTouch("touchstart", e);
+            firstMove = true;
+            cancelClickMove = false;
+        }, true);
+
+        document.addEventListener("mouseup", function (e) {
+            if (!mouseDown) return;
+            redirectMouseToTouch("touchend", e, lastTarget);	//bind it to initial mousedown target
+            lastTarget = null;
+            mouseDown = false;
+        }, true);
+
+        document.addEventListener("mousemove", function (e) {
+            if (!mouseDown) return;
+            if (firstMove) return firstMove = false
+            redirectMouseToTouch("touchmove", e);
+            e.preventDefault();
+
+            cancelClickMove = true;
+        }, true);
+    }
+    else { //Win8
+        document.addEventListener("MSPointerDown", function (e) {
+
+            mouseDown = true;
+            lastTarget = e.target;
+            if (e.target.nodeName.toLowerCase() == "a" && e.target.href.toLowerCase() == "javascript:;")
+                e.target.href = "#";
+            redirectMouseToTouch("touchstart", e);
+            firstMove = true;
+            cancelClickMove = false;
+            //  e.preventDefault();e.stopPropagation();
+        }, true);
+
+        document.addEventListener("MSPointerUp", function (e) {
+            if (!mouseDown) return;
+            redirectMouseToTouch("touchend", e, lastTarget);	//bind it to initial mousedown target
+            lastTarget = null;
+            mouseDown = false;
+            //	e.preventDefault();e.stopPropagation();
+        }, true);
+
+        document.addEventListener("MSPointerMove", function (e) {
+
+            if (!mouseDown) return;
+            if (firstMove) return firstMove = false
+            redirectMouseToTouch("touchmove", e);
+            e.preventDefault();
+            //e.stopPropagation();
+
+            cancelClickMove = true;
+
+        }, true);
+    }
+
+
+    //prevent all mouse events which dont exist on touch devices
+    document.addEventListener("drag", preventAll, true);
+    document.addEventListener("dragstart", preventAll, true);
+    document.addEventListener("dragenter", preventAll, true);
+    document.addEventListener("dragover", preventAll, true);
+    document.addEventListener("dragleave", preventAll, true);
+    document.addEventListener("dragend", preventAll, true);
+    document.addEventListener("drop", preventAll, true);
+    document.addEventListener("selectstart", preventAll, true);
+    document.addEventListener("click", function (e) {
+        if (!e.mouseToTouch && e.target == lastTarget) {
+            preventAll(e);
+        }
+        if (cancelClickMove) {
+            preventAll(e);
+            cancelClickMove = false;
+        }
+    }, true);
+
+
+    window.addEventListener("resize", function () {
+        var touchevt = document.createEvent("Event");
+        touchevt.initEvent("orientationchange", true, true);
+        document.dispatchEvent(touchevt);
+    }, false);
+    /*    var ee = document;
     document.mouseMoving = false;
-    document.onmousedown = function (e) {
+    document.addEventListener("MSPointerDown", function (e) {
         try {
+            if (e.target.nodeName.toLowerCase() == "a" && e.target.href.toLowerCase() == "javascript:;")
+                e.target.href = "#";
+
             this.mouseMoving = true;
             var touchevt = AppMobi.redirectMouseToTouch("touchstart", e);
             if (document.ontouchstart) {
                 document.ontouchstart(touchevt);
             }
         } catch (e) { }
-    }
-    document.onmouseup = function (e) {
+    }, false);
+
+    document.addEventListener("MSPointerUp", function (e) {
         try {
             this.mouseMoving = false;
             var touchevt = AppMobi.redirectMouseToTouch("touchend", e);
@@ -2253,8 +2405,9 @@ AppMobi.emulateTouchEvents = function () {
             }
         }
         catch (e) { }
-    }
-    document.onmousemove = function (e) {
+    }, false);
+
+    document.addEventListener("MSPointerMove", function (e) {
         try {
             if (!this.mouseMoving) return;
             var touchevt = AppMobi.redirectMouseToTouch("touchmove", e);
@@ -2263,7 +2416,8 @@ AppMobi.emulateTouchEvents = function () {
             }
         }
         catch (e) { }
-    }
+    }, false);
+    */
 }
 //only emulate if browser does not handle touch events
 if (!('ontouchstart' in document.documentElement)) {
