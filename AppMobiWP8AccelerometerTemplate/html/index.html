@@ -21,9 +21,6 @@
         margin:0px;padding:0px;
         background-image:url('images/background.jpg');
     }
-    #content {
-        display: none;
-    }
     #accelDot {
         height:10px; 
         width:10px;
@@ -81,9 +78,6 @@ var onDeviceReady = function () {
 
 	//hide appMobi's plash screen not yours
 	AppMobi.device.hideSplashScreen();	
-
-	document.getElementById('splashScreen').style.display = "none";
-	document.getElementById('content').style.display = "block";
 };
 document.addEventListener("appMobi.device.ready",onDeviceReady,false);    
 
@@ -156,9 +150,6 @@ function clearAccelerometer() {
 
 </head>
 <body>
-    <div id="splashScreen">
-        LOADING...
-    </div>
     <div id="content">
         <!-- Your app content goes here -->
         <div id="accelDot"></div>

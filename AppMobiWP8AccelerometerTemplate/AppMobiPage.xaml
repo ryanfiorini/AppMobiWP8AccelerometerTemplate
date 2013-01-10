@@ -23,6 +23,14 @@
                    Margin="0,0,0,0"  
                    x:Name="webView" 
                    VerticalAlignment="Stretch" IsScriptEnabled="True"/>
+        <Image Source="Assets/splash_portrait.png"
+          x:Name="SplashScreen"
+               Margin="0,0,0,0" 
+               Stretch="Fill"
+          VerticalAlignment="Stretch"
+          HorizontalAlignment="Stretch">
+        </Image>
+
     </Grid>
 
 </phone:PhoneApplicationPage>

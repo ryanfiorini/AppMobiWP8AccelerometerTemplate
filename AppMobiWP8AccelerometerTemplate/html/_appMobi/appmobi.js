@@ -24,7 +24,7 @@ AppMobi = {
     _constructors: [],
     jsVersion: '3.4.0',
     revision: 8,
-    sub: 5
+    sub: 8
 };
 
 /**
@@ -1386,7 +1386,20 @@ AppMobi.Device.prototype.sendEmail = function (body, to, subject, ishtml, cc, bc
 AppMobi.Device.prototype.sendSMS = function (body, to) {
 };
 
+AppMobi.Device.prototype.hideStatusBar = function () {
+    AppMobi.exec("AppMobiDevice.hideStatusBar");
+};
+
+AppMobi.Device.prototype.enableMultitouch = function () {
+};
+
 AppMobi.Device.prototype.setOrientation = function (orientation) {
+    AppMobi.device.orientation = orientation;
+
+    var e = document.createEvent('Events');
+    e.initEvent('appMobi.device.orientation.change', true, true);
+    e.orientation = orientation;
+    document.dispatchEvent(e);
 };
 
 AppMobi.Device.prototype.getRemoteDataImpl = function (requestUrl, requestMethod, requestBody, successCallback, errorCallback, id, hasId) {
@@ -1452,6 +1465,7 @@ AppMobi.Device.prototype.installUpdate = function () {
 };
 
 AppMobi.Device.prototype.hideSplashScreen = function () {
+    AppMobi.exec("AppMobiDevice~HideSplashScreen~");
 };
 
 AppMobi.Device.prototype.hideStatusBar = function () {
@@ -1627,6 +1641,7 @@ AppMobi.Display.prototype.stopAR = function () {
 
 
 AppMobi.Display.prototype.viewportOrientationListener = function (e) {
+    //console.log("in AppMobi.Display.prototype.viewportOrientationListener");
     AppMobi.display.updateViewportOrientation(AppMobi.device.orientation);
 }
 
@@ -1636,8 +1651,9 @@ AppMobi.Display.prototype.viewportOrientationListener = function (e) {
 */
 AppMobi.Display.prototype.useViewport = function (portraitWidthInPx, landscapeWidthInPx) {
     /// <param name='widthPortrait'></param>
-
     /// <param name='widthLandscape'></param>
+    //console.log("in AppMobi.Display.prototype.useViewport");
+
     AppMobi.display.viewport.portraitWidth = parseInt(portraitWidthInPx);
     AppMobi.display.viewport.landscapeWidth = parseInt(landscapeWidthInPx);
     if (isNaN(AppMobi.display.viewport.portraitWidth) || isNaN(AppMobi.display.viewport.landscapeWidth)) return;
@@ -1673,7 +1689,6 @@ AppMobi.Display.prototype.lockViewportWindow = function (portwidth, portheight, 
 }
 
 AppMobi.Display.prototype.updateViewportContent = function (content) {
-    AppMobi.debug.log("content: " + content);
     content += "";
     if (content.indexOf("px") === -1)
         content += "px";
@@ -1698,6 +1713,7 @@ AppMobi.Display.prototype.updateViewportContent = function (content) {
     viewPortCss.innerHTML = "@-ms-viewport{width: " + content + ";}";
     viewPortCss.innerHTML += "@viewport {zoom:1;max-zoom:1;min-zoom:1;user-zoom:zoom;}";
     head.appendChild(viewPortCss);
+    AppMobi.debug.log("viewPortCss: " + viewPortCss);
     //window.external.notify("~REDRAW");
     AppMobi.exec("~redraw~");
 }
@@ -1710,9 +1726,7 @@ AppMobi.Display.prototype.updateViewportOrientation = function (orientation) {
         width = AppMobi.display.viewport.landscapeWidth;
     }
     var content = "width=" + width + ",maximum-scale=10.0,user-scalable=no";
-    AppMobi.debug.log("orientation: " + orientation);
-    AppMobi.debug.log("portraitWidth: " + AppMobi.display.viewport.portraitWidth);
-    AppMobi.debug.log("landscapeWidth: " + AppMobi.display.viewport.landscapeWidth);
+    AppMobi.debug.log("orientation: " + orientation, "portraitWidth: " + AppMobi.display.viewport.portraitWidth, "landscapeWidth: " + AppMobi.display.viewport.landscapeWidth);
     //AppMobi.debug.log("****"+content);
     AppMobi.display.updateViewportContent(width);
 }
@@ -2504,118 +2518,125 @@ AppMobi.context.loadPolySound = function (sound, count) {
     AppMobi.player.loadSound(sound, count);
 }
 AppMobi.context.hideLoadingScreen = function () { };
-try {
-    window.addEventListener("load", function (e) {
-        window.addEventListener("message", function (e) { try { eval(e.data); } catch (ex) { } }, false);
 
-        //DirectCanvas compatibility: should use iframe instead?
-        Canvas = document.getElementById('_cvs');
+if (document.readyState === "complete" || document.readyState === "complete")  //IE10 fires interactive too early
+    callback();
+else
+    window.addEventListener("load", loadCallback, false);
 
-        if (!Canvas) {
-            var _cvs = document.createElement('canvas');
-            _cvs.id = '_cvs';
-            document.body.appendChild(_cvs);
-            Canvas = _cvs;
+function loadCallback(e) {
+    window.addEventListener("message", function (e) { try { eval(e.data); } catch (ex) { } }, false);
 
-            //need to align with screen so that touch forwarding will work
-            Canvas.style.position = 'absolute';
-            Canvas.style.top = '0px';
-            Canvas.style.left = '0px';
-            Canvas.style.zIndex = -2;
-        }
+    //DirectCanvas compatibility: should use iframe instead?
+    Canvas = document.getElementById('_cvs');
 
-        Canvas.context = {};
+    if (!Canvas) {
+        var _cvs = document.createElement('canvas');
+        _cvs.id = '_cvs';
+        document.body.appendChild(_cvs);
+        Canvas = _cvs;
 
-        Canvas.origGetContext = Canvas.getContext;
-        Canvas.getContext = function (ctx) {
-            var context = Canvas.origGetContext(ctx);
-            context.setFPS = function () { };
-            context.clear = function () { };
-            context.present = function () { };
+        //need to align with screen so that touch forwarding will work
+        Canvas.style.position = 'absolute';
+        Canvas.style.top = '0px';
+        Canvas.style.left = '0px';
+        Canvas.style.zIndex = -2;
+    }
 
-            Object.defineProperty(context, "height", {
-                set: function (h) {
-                    Canvas.setAttribute("height", h + "px");
-                }
-            });
-            Object.defineProperty(context, "width", {
-                set: function (w) {
-                    Canvas.setAttribute("width", w + "px");
-                }
-            });
-            Object.defineProperty(context, "globalScale", {
-                set: function () {
-                }
-            });
+    Canvas.context = {};
 
-            return context;
-        }
+    Canvas.origGetContext = Canvas.getContext;
+    Canvas.getContext = function (ctx) {
+        var context = Canvas.origGetContext(ctx);
+        context.setFPS = function () { };
+        context.clear = function () { };
+        context.present = function () { };
 
-        Canvas.isHidden = true;
-
-        Canvas.load = function (strRelativeURL) {
-            AppMobi.inject(strRelativeURL);
-        };
-
-        Canvas.show = function () {
-            this.isHidden = false;
-            Canvas.style.display = "block";
-        };
-
-        Canvas.hide = function () {
-            this.isHidden = true;
-            Canvas.style.display = "none";
-        };
-
-        Canvas.execute = function (strJavascript) {
-            //alert(strJavascript);
-            eval(strJavascript);
-        };
-
-        Canvas.eval = function (strJavascript) {
-            eval(strJavascript);
-        };
-
-        Canvas.reset = function () {
-            //compatibility stub
-
-            //should reload page?
-        };
-
-        Canvas.setFramesPerSecond = function (fps) {
-            //compatibility stub
-        };
-
-        Canvas.setFPS = function (fps) {
-            //compatibility stub
-        };
-
-        AppMobi.canvas = Canvas;
-
-        //fire deviceReady -- this will happen automatically on android - how to make sure DirectCanvas shim is ready first?
-
-        try {
-            if (AppMobi.hasLocalStorage) {
-                AppMobi.device.uuid = localStorage.getItem("appMobi.uuid");
+        Object.defineProperty(context, "height", {
+            set: function (h) {
+                Canvas.setAttribute("height", h + "px");
             }
-            if (!AppMobi.device.uuid || AppMobi.device.uuid == "") {
-                AppMobi.device.uuid = createGUID();
-                localStorage.setItem('appMobi.uuid', AppMobi.device.uuid, 365);
+        });
+        Object.defineProperty(context, "width", {
+            set: function (w) {
+                Canvas.setAttribute("width", w + "px");
             }
-        } catch (e) { }
+        });
+        Object.defineProperty(context, "globalScale", {
+            set: function () {
+            }
+        });
 
-        AppMobi.available = true;
-        AppMobi.cache.initialize();
-        AppMobi.device.initialize();
-        AppMobi.facebook.internal.initialize();
-        AppMobi.oauth.internal.initialize();
-        AppMobi.analytics.initialize();
-        AppMobi.analytics.logPageEvent("/device/start.event", "-");
-        setTimeout("fireDeviceReady();", 2000);
+        return context;
+    }
 
-        this.removeEventListener('load', arguments.callee, false);
-    }, false);
-} catch (e) { }
+    Canvas.isHidden = true;
+
+    Canvas.load = function (strRelativeURL) {
+        AppMobi.inject(strRelativeURL);
+    };
+
+    Canvas.show = function () {
+        this.isHidden = false;
+        Canvas.style.display = "block";
+    };
+
+    Canvas.hide = function () {
+        this.isHidden = true;
+        Canvas.style.display = "none";
+    };
+
+    Canvas.execute = function (strJavascript) {
+        //alert(strJavascript);
+        eval(strJavascript);
+    };
+
+    Canvas.eval = function (strJavascript) {
+        eval(strJavascript);
+    };
+
+    Canvas.reset = function () {
+        //compatibility stub
+
+        //should reload page?
+    };
+
+    Canvas.setFramesPerSecond = function (fps) {
+        //compatibility stub
+    };
+
+    Canvas.setFPS = function (fps) {
+        //compatibility stub
+    };
+
+    AppMobi.canvas = Canvas;
+
+    //fire deviceReady -- this will happen automatically on android - how to make sure DirectCanvas shim is ready first?
+
+    try {
+        if (AppMobi.hasLocalStorage) {
+            AppMobi.device.uuid = localStorage.getItem("appMobi.uuid");
+        }
+        if (!AppMobi.device.uuid || AppMobi.device.uuid == "") {
+            AppMobi.device.uuid = createGUID();
+            localStorage.setItem('appMobi.uuid', AppMobi.device.uuid, 365);
+        }
+    } catch (e) { }
+
+    AppMobi.available = true;
+    AppMobi.cache.initialize();
+    AppMobi.device.initialize();
+    AppMobi.facebook.internal.initialize();
+    AppMobi.oauth.internal.initialize();
+    AppMobi.analytics.initialize();
+    AppMobi.analytics.logPageEvent("/device/start.event", "-");
+
+    fireDeviceReady();
+    //setTimeout("fireDeviceReady();", 2000);
+
+    this.removeEventListener("load", loadCallback, false);
+};
+
 
 function fireDeviceReady() {
     AppMobi.helper.sendAppStart();
